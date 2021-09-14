@@ -1,0 +1,88 @@
+<robot name="ecoboat" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:property name="thruster_to_gpsbase" value="-5.45" />
+  <xacro:property name="thruster_y" value="0.58" />
+  <xacro:property name="thruster_to_bow_thruster" value="4.73" />
+  <xacro:property name="thruster_to_gravity" value="1.25" />
+
+  <xacro:property name="base_to_body" value="-2.4" />
+  <xacro:property name="gps_base_z" value="1.5" />
+  <xacro:property name="base_to_rover_x" value="-5.050" />
+  <xacro:property name="base_to_rover_y" value="0.7315" />
+
+  <xacro:property name="camera_angle" value="15" />
+
+  <material name="body">
+    <color rgba="0.7 0.7 0.7 1.0"/>
+  </material>
+  <material name="sensor">
+    <color rgba="0.0 0.0 1.0 2.0"/>
+  </material>
+  <material name="thruster">
+    <color rgba="1.0 0.0 0.0 2.0"/>
+  </material>
+    
+  <!-- <link name="odom"/> -->
+  <link name="base_link">
+  </link>
+  <link name="gravity_link">
+  </link>
+  <link name="gps_base_link">
+
+  </link>
+  <link name="gps_rover_left_link">
+
+  </link>
+  <link name="gps_rover_right_link">
+  </link>
+  <link name="imu_link">
+    <visual>
+    <geometry>
+      <box size="0.03 0.03 0.03" />
+    </geometry>
+      <material name="sensor"/>
+    </visual>
+  </link>
+
+  <joint name="gravity_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="${thruster_to_gpsbase + thruster_to_gravity} 0 0"/>
+    <parent link="base_link"/>
+    <child  link="gravity_link"/>
+  </joint>
+
+  <joint name="gps_base_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 ${gps_base_z}"/>
+    <parent link="base_link"/>
+    <child  link="gps_base_link"/>
+  </joint>
+  <joint name="gps_rover_left_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="${base_to_rover_x} ${base_to_rover_y} 0."/>
+    <parent link="gps_base_link"/>
+    <child  link="gps_rover_left_link"/>
+  </joint>
+  <joint name="gps_rover_right_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="${base_to_rover_x} -${base_to_rover_y} 0."/>
+    <parent link="gps_base_link"/>
+    <child  link="gps_rover_right_link"/>
+  </joint>
+  <joint name="imu_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="-1.5 0 1.1"/>
+    <!-- <origin rpy="0 0 ${-pi/2.0}" xyz="0.0 0 1.1"/> -->
+    <parent link="base_link"/>
+    <child  link="imu_link"/>
+  </joint>
+
+  <xacro:include filename="$(find ek_gps)/xacro/ek_engine.xacro" />
+  <xacro:ek_engine prefix="left" position="${thruster_to_gpsbase} ${thruster_y} 0.35" />
+  <xacro:ek_engine prefix="right" position="${thruster_to_gpsbase} -${thruster_y} 0.35" />
+  <xacro:ek_engine prefix="lateral" position="${thruster_to_gpsbase + thruster_to_bow_thruster} 0.0 0.35" orientation="0.0 0.0 1.5707"/>
+  
+  <xacro:include filename="$(find ek_gps)/xacro/ek_camera.xacro" />
+  <xacro:ek_camera name="front_camera" x="0.5" y="0." z="1.3" P="${radians(15)}" />
+  <xacro:ek_camera name="left_camera" x="-1.9" y="0.7" z="1.3" P="${radians(15)}" Y="${radians(90)}" />
+  <xacro:ek_camera name="right_camera" x="-1.9" y="-0.7" z="1.3" P="${radians(15)}" Y="${radians(-90)}" />
+
+  <xacro:include filename="$(find ek_gps)/xacro/ek_lidar.xacro" />
+  <xacro:ek_lidar name="lidar" x="0.3" y="0.0" z="1.4"/>
+
+</robot>
